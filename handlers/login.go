@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 // field to keep in the login form
@@ -21,11 +21,35 @@ import (
 	}
 **/
 
+type userClaim struct {
+	firstName      string `json:"firstname"`
+	lastName       string `json:"lastname"`
+	password       string `json:"password"`
+	uniqueUsername string `json:"username"`
+	jwt.StandardClaims
+}
+
 func Login(ctx *gin.Context) {
-	data, err := ioutil.ReadAll(ctx.Request.Body)
+
+	mySigningKey := []byte("AllYourBase")
+
+	// Create the Claims
+	claims := userClaim{
+		"bar",
+		"bar",
+		"bar",
+		"bar",
+		jwt.StandardClaims{
+			ExpiresAt: 15000,
+			Issuer:    "test",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString(mySigningKey)
 	if err != nil {
-		http.Error(ctx.Writer, " Error Reading Request Data ", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, " Error Signing String ")
 		return
 	}
-	ctx.JSON(http.StatusAccepted, data)
+	ctx.JSON(http.StatusAccepted, ss)
 }
