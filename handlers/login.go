@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -52,18 +51,22 @@ func Signup(ctx *gin.Context) {
 	// again prompted for the user to login.
 	var user User
 	ctx.BindJSON(&user)
-	finalUser := &User{
-		Email:    "aaa@gmail.com",
-		Password: "falksdfj",
-		Username: "JD",
+	finalUser := &user
+	mySigningKey := []byte(finalUser.Password)
+
+	claims := jwt.MapClaims{
+		"username":  finalUser.Username,
+		"ExpiresAt": time.Now().Add(time.Minute * 4).Unix(),
+		"IssuedAt":  time.Now().Unix(),
 	}
 
-	finalUserJson, err := json.Marshal(finalUser)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(mySigningKey)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, " Json Marshall Failed ")
+		ctx.JSON(http.StatusBadRequest, " Error Signing The Token ")
 		return
 	}
 
-	ctx.JSON(http.StatusAccepted, string(finalUserJson))
+	ctx.JSON(http.StatusAccepted, tokenString)
 }
