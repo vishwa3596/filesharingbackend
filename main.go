@@ -12,6 +12,6 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middlewares.CORSMiddleware())
-	router.POST("/auth/login", handlers.Login)
+	router.POST("/auth/signup", handlers.Signup)
 	router.Run(":8000")
 }
